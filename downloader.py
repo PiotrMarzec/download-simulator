@@ -14,7 +14,8 @@ class Downloader:
         self.game = game
         self.threads = []
         self.ticks = 0
-        self.mean_chunk_download_time_optimizer = None
+
+        self.optimizer = None
 
         for i in range(0, threads_count):
             self.threads.append(Thread(i))
@@ -45,8 +46,8 @@ class Downloader:
 
         self.ticks = self.ticks + 1
 
-        if self.mean_chunk_download_time_optimizer:
-            self.mean_chunk_download_time_optimizer.tick(self)
+        if self.optimizer:
+            self.optimizer.tick(self)
 
         return bytes
 
@@ -60,8 +61,8 @@ class Downloader:
         return self.cdn_list.get_random()
 
     def on_chunk_complete(self, chunk):
-        if self.mean_chunk_download_time_optimizer:
-            self.mean_chunk_download_time_optimizer.on_chunk_complete(chunk)
+        if self.optimizer:
+            self.optimizer.on_chunk_complete(self, chunk)
 
 
 class Thread:

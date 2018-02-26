@@ -33,7 +33,9 @@ class Screen:
         draw_threads(threads)
         draw_summary(self.downloader, bytes)
 
-        draw_mean_chunk_download_time_optimizer(self.downloader)
+        if self.downloader.optimizer:
+            print('----- OPTIMIZER: {} -----'.format(self.downloader.optimizer.name))
+            self.downloader.optimizer.draw(self.downloader, bytes)
 
 
 def clear():
@@ -81,14 +83,4 @@ def draw_summary(downloader, bytes):
         downloader.game.get_remaining_chunks_count(),
         bytes,
         round(bytes / downloader.connection.speed * 100)
-    ))
-
-
-def draw_mean_chunk_download_time_optimizer(downloader):
-    if not downloader.mean_chunk_download_time_optimizer:
-        return
-
-    print('------------------')
-    print('Mean Chunk Download Time: {}'.format(
-        downloader.mean_chunk_download_time_optimizer.chunk_mean_time
     ))

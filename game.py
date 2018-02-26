@@ -68,6 +68,12 @@ class FileChunk:
     def get_current_download_time(self):
         return time() - self.started_time
 
+    def get_total_download_time(self):
+        if not self.is_complete():
+            raise RuntimeError()
+
+        return self.finished_time - self.started_time
+
     def restart(self):
         self.bytes_downloaded = 0
         self.started = False

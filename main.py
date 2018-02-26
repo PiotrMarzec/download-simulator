@@ -3,8 +3,9 @@ import cdn
 import downloader
 import screen
 import optimize
+import time
 
-game = game.Game(20)
+game = game.Game(30)
 connection = downloader.InternetConnection(1000 * 1024)
 
 cdn_list = cdn.CdnList()
@@ -14,7 +15,7 @@ cdn_list.add_cdn(cdn.Cdn(connection.speed * 0.2, "slow"))
 cdn_list.add_cdn(cdn.Cdn(connection.speed * 0.01, "glacier"))
 
 downloader = downloader.Downloader(cdn_list, connection, game, 10)
-downloader.mean_chunk_download_time_optimizer = optimize.MeanChunkDownloadTimeOptimizer()
+downloader.optimizer = optimize.NaiveLiveCdnRatioByMeanChunkTime()
 
 screen = screen.Screen(downloader)
 screen.start()
@@ -23,6 +24,6 @@ while game.get_remaining_chunks_count():
     bytes = downloader.tick()
 
     screen.tick(bytes)
-    # time.sleep(0.001)
+    time.sleep(0.01)
 
 screen.finish()
