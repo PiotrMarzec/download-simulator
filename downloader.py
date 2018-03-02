@@ -14,6 +14,7 @@ class Downloader:
         self.game = game
         self.threads = []
         self.ticks = 0
+        self.total_progress = 0
 
         self.optimizer = None
 
@@ -61,6 +62,7 @@ class Downloader:
         return self.cdn_list.get_random()
 
     def on_chunk_complete(self, chunk):
+
         if self.optimizer:
             self.optimizer.on_chunk_complete(self, chunk)
 

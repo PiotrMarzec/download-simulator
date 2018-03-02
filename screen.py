@@ -62,7 +62,7 @@ def draw_threads(threads):
 
         if thread.chunk:
             print(
-                "Thread#{:<2} chunk:{:<7} cdn:{:<7} bytes_remaining:{:<9} {}".format(
+                "Thread#{:<2} chunk:{:<7} cdn:{:<10} bytes_remaining:{:<9} {}".format(
                     thread.id,
                     thread.chunk.id,
                     thread.cdn.name,

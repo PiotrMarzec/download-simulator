@@ -72,7 +72,6 @@ class NaiveLiveCdnRatioByMeanChunkTime:
                 cdn.ratio = 100 - round(
                     cdn.chunk_mean_time / sum_cdn_mean_times(downloader.cdn_list.list) * 100
                 )
-        pass
 
     def draw(self, downloader, bytes):
         for cdn in downloader.cdn_list.list:
@@ -84,6 +83,32 @@ class NaiveLiveCdnRatioByMeanChunkTime:
                     cdn.ratio
                 )
             )
+
+
+class NaiveLiveCdnRatioByMeanChunkTimeWithSubParCdnRemoval(NaiveLiveCdnRatioByMeanChunkTime):
+    """
+    Remove sub-par CDNs from the pool. The further in time we are, the more CDNs we remove
+    """
+
+    def __init__(self):
+        NaiveLiveCdnRatioByMeanChunkTime.__init__(self)
+
+    def optimize(self, downloader):
+        NaiveLiveCdnRatioByMeanChunkTime.optimize(self, downloader)
+
+        for cdn in downloader.cdn_list.list:
+            # some arbitrary condition
+            if cdn.ratio > 5 and cdn.ratio < 20:
+                downloader.cdn_list.remove(cdn)
+
+    def tick(self, downloader):
+        NaiveLiveCdnRatioByMeanChunkTime.tick(self, downloader)
+
+    def on_chunk_complete(self, downloader, chunk):
+        NaiveLiveCdnRatioByMeanChunkTime.on_chunk_complete(self, downloader, chunk)
+
+    def draw(self, downloader, bytes):
+        NaiveLiveCdnRatioByMeanChunkTime.draw(self, downloader, bytes)
 
 
 def find_cdn_by_chunk(downloader, chunk):
