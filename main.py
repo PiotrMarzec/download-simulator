@@ -24,6 +24,6 @@ while game.get_remaining_chunks_count():
     bytes = downloader.tick()
 
     screen.tick(bytes)
-    # time.sleep(0.001) # sleep for better presentation
+    time.sleep(0.001)  # sleep for better presentation
 
 screen.finish()  # print summary

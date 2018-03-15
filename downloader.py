@@ -2,9 +2,31 @@ from random import randrange
 from random import shuffle
 
 
+class InternetConnectionTick:
+    def __init__(self, max_bytes):
+        self.max_bytes = max_bytes
+        self.bytes_used = 0
+
+    def use_bytes(self, bytes):
+        self.bytes_used += bytes
+
+        if self.bytes_used > self.max_bytes:
+            raise RuntimeError('exceeded max_bytes')
+
+    def get_bytes_remaining(self):
+        return self.max_bytes - self.bytes_used
+
+
 class InternetConnection:
     def __init__(self, speed):
         self.speed = speed
+
+    def get_new_tick(self):
+        return InternetConnectionTick(self.get_tick_max_bytes())
+
+    def get_tick_max_bytes(self):
+        """returns 70-100% of total connection speed"""
+        return round((randrange(70, 100) / 100) * self.speed)
 
 
 class Downloader:
@@ -22,28 +44,30 @@ class Downloader:
             self.threads.append(Thread(i))
 
     def tick(self):
-        max_bytes = self.get_tick_max_bytes()
-        bytes = 0
-        current_threads = 0
+        connection_tick = self.connection.get_new_tick()
+        bytes_downloaded = 0
 
-        shuffle(self.threads)
+        shuffle(self.threads)  # shuffle the threads so they proceed in random order
 
         # tick existing threads
         for thread in self.threads:
             if thread.is_empty():
+                """if the thread is empty, assign chunk and cdn"""
                 thread.chunk = self.get_next_chunk()
                 thread.cdn = self.get_cdn()
 
             if thread.is_complete():
+                """if the thread completed, assign new chunk and cdn"""
                 self.on_chunk_complete(thread.chunk)
                 thread.chunk = self.get_next_chunk()
                 thread.cdn = self.get_cdn()
 
-            thread_bytes = thread.tick(max_bytes) # tick thread
+            # tick the thread, read thread bytes downloaded
+            thread_bytes_downloaded = thread.tick(connection_tick.get_bytes_remaining())
+            # use the thread bytes downloaded in the connection tick
+            connection_tick.use_bytes(thread_bytes_downloaded)
 
-            max_bytes -= thread_bytes # decrease remaining bytes in tick
-            bytes += thread_bytes # total bytes in tick
-            current_threads += 1
+            bytes_downloaded += thread_bytes_downloaded  # inc total bytes downloader in tick
 
         self.ticks += 1
         self.total_progress = round(
@@ -55,10 +79,7 @@ class Downloader:
         if self.optimizer:
             self.optimizer.tick(self)
 
-        return bytes
-
-    def get_tick_max_bytes(self):
-        return round((randrange(70, 100) / 100) * self.connection.speed)
+        return bytes_downloaded
 
     def get_next_chunk(self):
         return self.game.get_first_incomplete_chunk()
@@ -82,7 +103,7 @@ class Thread:
         if self.is_empty():
             return 0
 
-        bytes_downloaded = round((randrange(20, 100)/100) * self.cdn.speed)
+        bytes_downloaded = round((randrange(20, 100) / 100) * self.cdn.speed)  # download between 20%-100% of CDN speed
 
         # we can't download more than remaining bytes in the given tick
         if bytes_downloaded > max_bytes:
@@ -113,4 +134,3 @@ class Thread:
 
     def is_empty(self):
         return self.chunk == None
-
