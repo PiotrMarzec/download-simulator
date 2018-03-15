@@ -97,8 +97,11 @@ class NaiveLiveCdnRatioByMeanChunkTimeWithSubParCdnRemoval(NaiveLiveCdnRatioByMe
         NaiveLiveCdnRatioByMeanChunkTime.optimize(self, downloader)
 
         for cdn in downloader.cdn_list.list:
-            # some arbitrary condition
-            if cdn.ratio > 5 and cdn.ratio < 20:
+            # until 25% progress only remove slowest CDNs:
+            if downloader.total_progress > 25 and 0 <= cdn.ratio <= 25:
+                downloader.cdn_list.remove(cdn)
+            # after 50% remove more CNDs:
+            if cdn and len(downloader.cdn_list.list) > 2 and downloader.total_progress > 50 and 0 <= cdn.ratio <= 50:
                 downloader.cdn_list.remove(cdn)
 
     def tick(self, downloader):

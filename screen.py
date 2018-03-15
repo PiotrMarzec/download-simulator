@@ -15,8 +15,8 @@ class Screen:
 
     def finish(self):
         self.finish_time = time.time()
-        print("TOTAL DOWNLOAD TIME: {}".format(
-            self.finish_time - self.start_time
+        print("TOTAL TICKS: {}".format(
+            self.downloader.ticks
         ))
 
     def tick(self, bytes):

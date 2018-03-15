@@ -41,11 +41,16 @@ class Downloader:
 
             thread_bytes = thread.tick(max_bytes) # tick thread
 
-            max_bytes = max_bytes - thread_bytes # decrease remaining bytes in tick
-            bytes = bytes + thread_bytes # total bytes in tick
-            current_threads = current_threads + 1
+            max_bytes -= thread_bytes # decrease remaining bytes in tick
+            bytes += thread_bytes # total bytes in tick
+            current_threads += 1
 
-        self.ticks = self.ticks + 1
+        self.ticks += 1
+        self.total_progress = round(
+            100 -
+            self.game.get_remaining_chunks_count() /
+            self.game.calculate_total_chunks() * 100
+        )
 
         if self.optimizer:
             self.optimizer.tick(self)
